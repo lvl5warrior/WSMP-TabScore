@@ -1,0 +1,129 @@
+# WSMP-TabScoreboard configuration
+#
+# Every line below (scoreboard lines, tablist prefix/suffix/footer) is
+# plain text run through PlaceholderAPI, so you can use any placeholder
+# any of your other installed plugins expose (%wsmpclasses_...%,
+# %wsmpjobbar_...%, %luckperms_...%, etc.) - edit these freely without
+# needing a rebuild, either by hand + "/tabscoreboard reload", or live
+# with "/tabscoreboard set/line/addline/..." (see /tabscoreboard for the
+# full list).
+#
+# {rank} and {world} are special, BUILT-IN tokens this plugin resolves
+# itself, NOT through PlaceholderAPI:
+#   {rank}  - read directly from WSMP-Duels. Always works as long as
+#             WSMP-Duels is installed and enabled, blank otherwise.
+#   {world} - looked up in scoreboard.world-display-by-world below,
+#             based on whichever world the player is currently in.
+#
+# CONFIDENCE CHECK on the placeholders below, since PlaceholderAPI just
+# leaves a placeholder as literal text if it doesn't recognize one:
+#   %server_online% / %server_max_players% / %player_ping% - these need
+#     PAPI's separate "Server"/"Player" expansions downloaded once via
+#     "/papi ecloud download Server" and "/papi ecloud download Player",
+#     then "/papi reload". Not built into PlaceholderAPI itself.
+#   %luckperms_prefix% - LuckPerms' own OFFICIAL, always-built-in PAPI
+#     expansion (no download needed) - shows whatever prefix is set on
+#     the player's LuckPerms group, which is the standard way a
+#     Discord-role-synced rank shows up in-game.
+#   %wsmpclasses_class% / %wsmpclasses_path% / %wsmpclasses_level%
+#   / %wsmpteams_team% / %wsmpjobbar_highest_job_level% (all confirmed
+#     working - the WSMP-Jobs one was found by directly inspecting that
+#     plugin's compiled code, not guessed). Note that
+#     %wsmpjobbar_highest_job_level% already returns the job name AND
+#     level combined ("Hunter - Lv.8"), not just a bare number - there's
+#     also a separate %wsmpjobbar_highest_job% for just the name alone,
+#     but combining both produces duplicated text.
+#   %wsmpsimplesell_highest_item% / %wsmpsimplesell_highest_level% -
+#     this stat actually lives in WSMP-SimpleSell, not WSMP-Classes (my
+#     original guess was searching the wrong plugin's jar). Confirmed to
+#     exist by directly inspecting WSMP-SimpleSell's compiled code - the
+#     expansion identifier is "wsmpsimplesell". Unlike
+#     %wsmpjobbar_highest_job_level%, "highest_level" here is just the
+#     bare level number, not a combined name+level string - the current
+#     line explicitly combines both placeholders itself.
+#
+# The little symbols in front of each line below (star/diamond/club/
+# spade/lightning/smiley) are plain Unicode characters, not a resource
+# pack - they're from the same widely-supported symbol ranges countless
+# other Bukkit/Spigot scoreboards have used for years, so they should
+# render fine without any extra setup, but if any one of them shows up
+# as a blank box in your client, that's your signal that specific glyph
+# isn't in your font - just swap it for a different symbol or drop it,
+# no rebuild needed either way.
+
+scoreboard:
+  enabled: true
+  # How often the sidebar refreshes, in ticks (20 ticks = 1 second).
+  update-interval-ticks: 20
+  title: "&c&lWARRIORS &f&lSMP"
+  # The "&7&m    " lines are a divider trick, not a mistake - strikethrough
+  # formatting drawn over a run of spaces renders as a plain horizontal
+  # line, a long-standing, widely-used way to visually separate sections
+  # on a Minecraft scoreboard without needing any special characters.
+  #
+  # Vanilla's own sidebar has never rendered more than 15 lines at once
+  # regardless of version - this list is kept at 14 deliberately, to
+  # leave one line of headroom for "/tabscoreboard addline" before
+  # hitting that real ceiling.
+  lines:
+    - "&7&m                        "
+    - "&f♠ &7World {world}"
+    - "&f☺ &7Players &f%server_online%&7/&f%server_max_players%"
+    - "&f⚡ &7Ping &a%player_ping%ms"
+    - "&f⚔ &7Class &b%wsmpclasses_class%"
+    - "&f★ &7Rank {rank}"
+    - "&f♦ &7Discord %luckperms_prefix%"
+    - "&7&m                        "
+    - "&6&l♦ Top Item Level"
+    - "&f%wsmpsimplesell_highest_item% &7Lv.%wsmpsimplesell_highest_level%"
+    - ""
+    - "&6&l♣ Top Job Level"
+    - "&f%wsmpjobbar_highest_job_level%"
+    - "&7&m                        "
+  # Maps the world a player is CURRENTLY in to display text for the
+  # {world} token above. Each key must exactly match a real world's name
+  # (case-sensitive, same as the world folder name on disk). A cloned
+  # match instance (e.g. world_arena_instance_ab12cd34 from WSMP-Duels)
+  # still matches its base entry below automatically, checked by prefix
+  # as a fallback when there's no exact name match.
+  world-display-by-world:
+    world_hub: "&fHub"
+    world_duel: "&fDuel Arena"
+    world_arena: "&fThe Gauntlet"
+    world_nether: "&fThe Nether"
+    world_the_end: "&fThe End"
+    world: "&fOverworld"
+  # Shown if the player's current world doesn't match any entry above.
+  world-display-fallback: "&fWarriors SMP"
+
+tablist:
+  enabled: true
+  update-interval-ticks: 20
+  # The very first line of the header - shown above the per-world label
+  # on its own line (tab-list headers support embedded newlines).
+  header-welcome: "&e&lWelcome to &c&lWarriors SMP&e!"
+  # The header shown to a player changes based on which world they're
+  # CURRENTLY standing in - same matching rules as world-display-by-world
+  # above, just a separate map since the tab header is branded text
+  # rather than a plain world name.
+  header-by-world:
+    world_hub: "&c&lWSMP &f&lHUB"
+    world_duel: "&c&lDuel"
+    world_arena: "&c&lArena"
+    world_nether: "&c&lWSMP"
+    world_the_end: "&c&lWSMP"
+    world: "&c&lWSMP"
+  # Shown if the player's current world doesn't match any entry above.
+  header-fallback: "&c&lWSMP"
+  # Shown at the very bottom of the tab list, below every player - left
+  # empty by default now, since {rank} here just repeated the same rank
+  # already shown as each player's own prefix, which reads as a stray
+  # duplicate rather than useful info.
+  footer: ""
+  # Shown directly in front of each player's name in the tab list.
+  prefix: "{rank} &f"
+  # Shown directly after each player's name in the tab list - this is
+  # fully personalized per player (unlike the rank-based sort grouping,
+  # which only affects ordering, not what text shows), so it's safe to
+  # include per-player placeholders like class path or team name here.
+  suffix: " &8» &b%wsmpclasses_path% &7Lv.%wsmpclasses_level% &8| &f%wsmpteams_team% &8| %luckperms_prefix%"
